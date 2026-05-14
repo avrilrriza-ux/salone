@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../App.css";
 
 export default function Register({
   register,
@@ -7,6 +8,7 @@ export default function Register({
   const [form, setForm] = useState({
     username: "",
     password: "",
+    role: "CUSTOMER",
   });
 
   function handleChange(e) {
@@ -29,6 +31,7 @@ export default function Register({
       <h2>Create Account</h2>
 
       <form onSubmit={handleSubmit}>
+        
         <input
           type="text"
           name="username"
@@ -44,6 +47,17 @@ export default function Register({
           value={form.password}
           onChange={handleChange}
         />
+
+        {/* ROLE DROPDOWN */}
+        <select
+          name="role"
+          value={form.role}
+          onChange={handleChange}
+          className="role-select"
+        >
+          <option value="CUSTOMER">CUSTOMER</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
 
         <button className="primary-btn">
           Register

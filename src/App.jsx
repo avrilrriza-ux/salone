@@ -7,6 +7,8 @@ import AdminPanel from "./components/AdminPanel";
 import Login from "./components/Login";
 import Register from "./components/Register";
 
+import salonBg from "./assets/salon.png";
+
 export default function App() {
   const [page, setPage] = useState("login");
   const [userRole, setUserRole] = useState("");
@@ -148,8 +150,25 @@ export default function App() {
 
       <main className="main-content">
         {page === "home" && (
-          <section className="hero">
-            <div className="hero-card">
+          <section
+            className="hero"
+            style={{
+              backgroundImage: `url(${salonBg})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+          >
+            <div
+              className="hero-card"
+              style={{
+                background: "rgba(255, 255, 255, 0.15)",
+                backdropFilter: "blur(5px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "2px solid rgba(255, 255, 255, 0.4)",
+                borderRadius: "20px",
+              }}
+            >
               <p className="eyebrow">
                 Welcome to Saloné
               </p>
