@@ -1,122 +1,228 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from "react";
+import Navbar from "./components/Navbar";
+import ServiceCard from "./components/ServiceCard";
+import BookingForm from "./components/BookingForm";
+import BookingStatus from "./components/BookingStatus";
+import AdminPanel from "./components/AdminPanel";
+import Login from "./components/Login";
+import Register from "./components/Register";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [page, setPage] = useState("login");
+  const [userRole, setUserRole] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const [bookings, setBookings] = useState([]);
+  const [selectedService, setSelectedService] = useState("");
+
+  const services = [
+    { name: "Haircut & Styling", price: 250, duration: "45 mins" },
+    { name: "Hair Color", price: 1200, duration: "2 hrs" },
+    { name: "Manicure", price: 300, duration: "40 mins" },
+    { name: "Pedicure", price: 350, duration: "45 mins" },
+    { name: "Hair Treatment", price: 800, duration: "1 hr" },
+  ];
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("currentUser");
+
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+
+      setCurrentUser(parsedUser);
+      setUserRole(parsedUser.role);
+      setPage("home");
+    }
+  }, []);
+
+  function login(username, password) {
+    // ADMIN LOGIN
+    if (username === "salone" && password === "1234567") {
+      const adminUser = {
+        username: "salone",
+        role: "admin",
+      };
+
+      localStorage.setItem("currentUser", JSON.stringify(adminUser));
+
+      setCurrentUser(adminUser);
+      setUserRole("admin");
+      setPage("home");
+
+      return true;
+    }
+
+    // CUSTOMER LOGIN
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+
+    const foundUser = users.find(
+      (user) =>
+        user.username === username &&
+        user.password === password
+    );
+
+    if (foundUser) {
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify(foundUser)
+      );
+
+      setCurrentUser(foundUser);
+      setUserRole("customer");
+      setPage("home");
+
+      return true;
+    }
+
+    return false;
+  }
+
+  function register(userData) {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+
+    users.push({
+      ...userData,
+      role: "customer",
+    });
+
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Account created successfully!");
+    setPage("login");
+  }
+
+  function logout() {
+    localStorage.removeItem("currentUser");
+
+    setCurrentUser(null);
+    setUserRole("");
+    setPage("login");
+  }
+
+  function addBooking(newBooking) {
+    setBookings([
+      ...bookings,
+      {
+        id: Date.now(),
+        ...newBooking,
+        status: "Pending",
+      },
+    ]);
+
+    setPage("status");
+  }
+
+  function updateStatus(id, status) {
+    setBookings(
+      bookings.map((booking) =>
+        booking.id === id
+          ? { ...booking, status }
+          : booking
+      )
+    );
+  }
+
+  function cancelBooking(id) {
+    updateStatus(id, "Cancelled");
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="auth-wrapper">
+        {page === "login" ? (
+          <Login login={login} setPage={setPage} />
+        ) : (
+          <Register register={register} setPage={setPage} />
+        )}
+      </div>
+    );
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <Navbar
+        setPage={setPage}
+        userRole={userRole}
+        logout={logout}
+      />
 
-      <div className="ticks"></div>
+      <main className="main-content">
+        {page === "home" && (
+          <section className="hero">
+            <div className="hero-card">
+              <p className="eyebrow">
+                Welcome to Saloné
+              </p>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+              <h1>
+                Beauty appointments made effortless.
+              </h1>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+              <p>
+                Luxury salon appointment booking and
+                customer management system.
+              </p>
+
+              <button
+                className="primary-btn"
+                onClick={() =>
+                  userRole === "admin"
+                    ? setPage("admin")
+                    : setPage("services")
+                }
+              >
+                {userRole === "admin"
+                  ? "Open Admin Dashboard"
+                  : "Book Appointment"}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {page === "services" && (
+          <section>
+            <div className="section-heading">
+              <p className="eyebrow">Services</p>
+              <h2>Our Salon Services</h2>
+            </div>
+
+            <div className="service-grid">
+              {services.map((service, index) => (
+                <ServiceCard
+                  key={index}
+                  service={service}
+                  onBook={() => {
+                    setSelectedService(service.name);
+                    setPage("booking");
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {page === "booking" && (
+          <BookingForm
+              services={services}
+              addBooking={addBooking}
+              selectedService={selectedService}
+            />
+        )}
+
+        {page === "status" && (
+          <BookingStatus
+            bookings={bookings}
+            cancelBooking={cancelBooking}
+          />
+        )}
+
+        {page === "admin" && (
+          <AdminPanel
+            bookings={bookings}
+            updateStatus={updateStatus}
+          />
+        )}
+      </main>
+    </div>
+  );
 }
-
-export default App
