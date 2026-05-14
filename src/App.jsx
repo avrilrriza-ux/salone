@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import Navbar from "./components/Navbar";
 import ServiceCard from "./components/ServiceCard";
 import BookingForm from "./components/BookingForm";
@@ -9,24 +10,62 @@ import Register from "./components/Register";
 
 import salonBg from "./assets/salon.png";
 
+import haircutImg from "./assets/hair and styling.png";
+import haircolorImg from "./assets/Haircolor.png";
+import manicureImg from "./assets/Manicure.png";
+import pedicureImg from "./assets/Pedicure.png";
+import treatmentImg from "./assets/Hair treatment.png";
+
 export default function App() {
   const [page, setPage] = useState("login");
   const [userRole, setUserRole] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
 
   const [bookings, setBookings] = useState([]);
-  const [selectedService, setSelectedService] = useState("");
+  const [selectedService, setSelectedService] =
+    useState("");
 
   const services = [
-    { name: "Haircut & Styling", price: 250, duration: "45 mins" },
-    { name: "Hair Color", price: 1200, duration: "2 hrs" },
-    { name: "Manicure", price: 300, duration: "40 mins" },
-    { name: "Pedicure", price: 350, duration: "45 mins" },
-    { name: "Hair Treatment", price: 800, duration: "1 hr" },
+    {
+      name: "Haircut & Styling",
+      price: 250,
+      duration: "45 mins",
+      image: haircutImg,
+      icon: "✂️",
+    },
+    {
+      name: "Hair Color",
+      price: 1200,
+      duration: "2 hrs",
+      image: haircolorImg,
+      icon: "🎨",
+    },
+    {
+      name: "Manicure",
+      price: 300,
+      duration: "40 mins",
+      image: manicureImg,
+      icon: "💅",
+    },
+    {
+      name: "Pedicure",
+      price: 350,
+      duration: "45 mins",
+      image: pedicureImg,
+      icon: "🦶",
+    },
+    {
+      name: "Hair Treatment",
+      price: 800,
+      duration: "1 hr",
+      image: treatmentImg,
+      icon: "💧",
+    },
   ];
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("currentUser");
+    const savedUser =
+      localStorage.getItem("currentUser");
 
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
@@ -39,13 +78,19 @@ export default function App() {
 
   function login(username, password) {
     // ADMIN LOGIN
-    if (username === "salone" && password === "1234567") {
+    if (
+      username === "salone" &&
+      password === "1234567"
+    ) {
       const adminUser = {
         username: "salone",
         role: "admin",
       };
 
-      localStorage.setItem("currentUser", JSON.stringify(adminUser));
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify(adminUser)
+      );
 
       setCurrentUser(adminUser);
       setUserRole("admin");
@@ -55,7 +100,9 @@ export default function App() {
     }
 
     // CUSTOMER LOGIN
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const users =
+      JSON.parse(localStorage.getItem("users")) ||
+      [];
 
     const foundUser = users.find(
       (user) =>
@@ -80,14 +127,19 @@ export default function App() {
   }
 
   function register(userData) {
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const users =
+      JSON.parse(localStorage.getItem("users")) ||
+      [];
 
     users.push({
       ...userData,
       role: "customer",
     });
 
-    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem(
+      "users",
+      JSON.stringify(users)
+    );
 
     alert("Account created successfully!");
     setPage("login");
@@ -128,13 +180,20 @@ export default function App() {
     updateStatus(id, "Cancelled");
   }
 
+  // LOGIN / REGISTER
   if (!currentUser) {
     return (
       <div className="auth-wrapper">
         {page === "login" ? (
-          <Login login={login} setPage={setPage} />
+          <Login
+            login={login}
+            setPage={setPage}
+          />
         ) : (
-          <Register register={register} setPage={setPage} />
+          <Register
+            register={register}
+            setPage={setPage}
+          />
         )}
       </div>
     );
@@ -149,6 +208,8 @@ export default function App() {
       />
 
       <main className="main-content">
+
+        {/* HOME PAGE */}
         {page === "home" && (
           <section
             className="hero"
@@ -162,10 +223,13 @@ export default function App() {
             <div
               className="hero-card"
               style={{
-                background: "rgba(255, 255, 255, 0.15)",
+                background:
+                  "rgba(255, 255, 255, 0.15)",
                 backdropFilter: "blur(5px)",
-                WebkitBackdropFilter: "blur(12px)",
-                border: "2px solid rgba(255, 255, 255, 0.4)",
+                WebkitBackdropFilter:
+                  "blur(12px)",
+                border:
+                  "2px solid rgba(255, 255, 255, 0.4)",
                 borderRadius: "20px",
               }}
             >
@@ -174,12 +238,14 @@ export default function App() {
               </p>
 
               <h1>
-                Beauty appointments made effortless.
+                Beauty appointments made
+                effortless.
               </h1>
 
               <p>
-                Luxury salon appointment booking and
-                customer management system.
+                Luxury salon appointment
+                booking and customer management
+                system.
               </p>
 
               <button
@@ -198,36 +264,98 @@ export default function App() {
           </section>
         )}
 
+        {/* SERVICES PAGE */}
         {page === "services" && (
-          <section>
+          <section className="services-section">
             <div className="section-heading">
-              <p className="eyebrow">Services</p>
-              <h2>Our Salon Services</h2>
+              <p className="eyebrow">
+          
+              </p>
+
+              <h2>SERVICES</h2>
+
+              <p className="services-subtitle">
+                Pamper yourself with our
+                professional salon services
+                designed to make you look and
+                feel your best.
+              </p>
             </div>
 
             <div className="service-grid">
-              {services.map((service, index) => (
-                <ServiceCard
-                  key={index}
-                  service={service}
-                  onBook={() => {
-                    setSelectedService(service.name);
-                    setPage("booking");
-                  }}
-                />
-              ))}
+              {services.map(
+                (service, index) => (
+                  <ServiceCard
+                    key={index}
+                    service={service}
+                    onBook={() => {
+                      setSelectedService(
+                        service.name
+                      );
+                      setPage("booking");
+                    }}
+                  />
+                )
+              )}
+            </div>
+
+            {/* FEATURES */}
+            <div className="features">
+              <div className="feature-item">
+                <span>📅</span>
+
+                <div>
+                  <h4>Easy Booking</h4>
+
+                  <p>
+                    Book your appointment in
+                    just a few clicks
+                  </p>
+                </div>
+              </div>
+
+              <div className="feature-item">
+                <span>🛡️</span>
+
+                <div>
+                  <h4>
+                    Trusted Professionals
+                  </h4>
+
+                  <p>
+                    Experienced and certified
+                    salon experts
+                  </p>
+                </div>
+              </div>
+
+              <div className="feature-item">
+                <span>🌿</span>
+
+                <div>
+                  <h4>Premium Products</h4>
+
+                  <p>
+                    We use high-quality
+                    products for the best
+                    results
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
         )}
 
+        {/* BOOKING PAGE */}
         {page === "booking" && (
           <BookingForm
-              services={services}
-              addBooking={addBooking}
-              selectedService={selectedService}
-            />
+            services={services}
+            addBooking={addBooking}
+            selectedService={selectedService}
+          />
         )}
 
+        {/* STATUS PAGE */}
         {page === "status" && (
           <BookingStatus
             bookings={bookings}
@@ -235,12 +363,14 @@ export default function App() {
           />
         )}
 
+        {/* ADMIN PAGE */}
         {page === "admin" && (
           <AdminPanel
             bookings={bookings}
             updateStatus={updateStatus}
           />
         )}
+        
       </main>
     </div>
   );

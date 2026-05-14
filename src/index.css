@@ -7,23 +7,9 @@
 
 body {
   min-height: 100vh;
-  color: #3b332a;
+  color: #3b2a2a;
   font-family: "Segoe UI", sans-serif;
 
-  background:
-    radial-gradient(circle at top left, #fff8ef 0%, transparent 30%),
-    radial-gradient(circle at bottom right, #f3e5bd 0%, transparent 25%),
-    linear-gradient(
-      135deg,
-      #f8f5ef 0%,
-      #f3ead8 20%,
-      #efe4cf 40%,
-      #fff8ef 60%,
-      #e5d1ae 80%,
-      #c9a87c 100%
-    );
-
-  background-attachment: fixed;
 }
 
 button {
@@ -378,7 +364,7 @@ th {
 
 .nav-links .logout-btn {
   background: #9a714e !important;
-  color: #ffffff !important;
+  color: #ffffff62 !important;
   padding: 10px 18px;
   border-radius: 20px;
   font-weight: 700;
