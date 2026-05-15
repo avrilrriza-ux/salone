@@ -18,51 +18,21 @@ export default function App() {
   const [page, setPage] = useState("login");
   const [userRole, setUserRole] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
-
   const [bookings, setBookings] = useState([]);
-  const [selectedService, setSelectedService] =
-    useState("");
+  const [selectedService, setSelectedService] = useState("");
 
   const services = [
-    {
-      name: "Haircut & Styling",
-      price: 250,
-      duration: "45 mins",
-      image: haircutImg,
-    },
-    {
-      name: "Hair Color",
-      price: 1200,
-      duration: "2 hrs",
-      image: haircolorImg,
-    },
-    {
-      name: "Manicure",
-      price: 300,
-      duration: "40 mins",
-      image: manicureImg,
-    },
-    {
-      name: "Pedicure",
-      price: 350,
-      duration: "45 mins",
-      image: pedicureImg,
-    },
-    {
-      name: "Hair Treatment",
-      price: 800,
-      duration: "1 hr",
-      image: treatmentImg,
-    },
+    { name: "Haircut & Styling", price: 250,  duration: "45 mins", image: haircutImg },
+    { name: "Hair Color",        price: 1200, duration: "2 hrs",   image: haircolorImg },
+    { name: "Manicure",          price: 300,  duration: "40 mins", image: manicureImg },
+    { name: "Pedicure",          price: 350,  duration: "45 mins", image: pedicureImg },
+    { name: "Hair Treatment",    price: 800,  duration: "1 hr",    image: treatmentImg },
   ];
 
   useEffect(() => {
-    const savedUser =
-      localStorage.getItem("currentUser");
-
+    const savedUser = localStorage.getItem("currentUser");
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
-
       setCurrentUser(parsedUser);
       setUserRole(parsedUser.role);
       setPage("home");
@@ -70,49 +40,25 @@ export default function App() {
   }, []);
 
   function login(username, password) {
-    // ADMIN LOGIN
-    if (
-      username === "salone" &&
-      password === "1234567"
-    ) {
-      const adminUser = {
-        username: "salone",
-        role: "admin",
-      };
-
-      localStorage.setItem(
-        "currentUser",
-        JSON.stringify(adminUser)
-      );
-
+    if (username === "salone" && password === "1234567") {
+      const adminUser = { username: "salone", role: "admin" };
+      localStorage.setItem("currentUser", JSON.stringify(adminUser));
       setCurrentUser(adminUser);
       setUserRole("admin");
       setPage("home");
-
       return true;
     }
 
-    // CUSTOMER LOGIN
-    const users =
-      JSON.parse(localStorage.getItem("users")) ||
-      [];
-
+    const users = JSON.parse(localStorage.getItem("users")) || [];
     const foundUser = users.find(
-      (user) =>
-        user.username === username &&
-        user.password === password
+      (u) => u.username === username && u.password === password
     );
 
     if (foundUser) {
-      localStorage.setItem(
-        "currentUser",
-        JSON.stringify(foundUser)
-      );
-
+      localStorage.setItem("currentUser", JSON.stringify(foundUser));
       setCurrentUser(foundUser);
       setUserRole("customer");
       setPage("home");
-
       return true;
     }
 
@@ -120,90 +66,61 @@ export default function App() {
   }
 
   function register(userData) {
-    const users =
-      JSON.parse(localStorage.getItem("users")) ||
-      [];
-
-    users.push({
-      ...userData,
-      role: "customer",
-    });
-
-    localStorage.setItem(
-      "users",
-      JSON.stringify(users)
-    );
-
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    users.push({ ...userData, role: "customer" });
+    localStorage.setItem("users", JSON.stringify(users));
     alert("Account created successfully!");
     setPage("login");
   }
 
   function logout() {
     localStorage.removeItem("currentUser");
-
     setCurrentUser(null);
     setUserRole("");
     setPage("login");
   }
 
   function addBooking(newBooking) {
-    setBookings([
-      ...bookings,
-      {
-        id: Date.now(),
-        ...newBooking,
-        status: "Pending",
-      },
-    ]);
-
+    setBookings([...bookings, { id: Date.now(), ...newBooking, status: "Pending" }]);
     setPage("status");
   }
 
   function updateStatus(id, status) {
-    setBookings(
-      bookings.map((booking) =>
-        booking.id === id
-          ? { ...booking, status }
-          : booking
-      )
-    );
+    setBookings(bookings.map((b) => (b.id === id ? { ...b, status } : b)));
   }
 
   function cancelBooking(id) {
     updateStatus(id, "Cancelled");
   }
 
-  // LOGIN / REGISTER
+  /*  AUTH SCREENS */
   if (!currentUser) {
     return (
-      <div className="auth-wrapper">
+      <div
+        className="auth-wrapper"
+        style={{
+          backgroundImage: `url(${salonBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         {page === "login" ? (
-          <Login
-            login={login}
-            setPage={setPage}
-          />
+          <Login login={login} setPage={setPage} />
         ) : (
-          <Register
-            register={register}
-            setPage={setPage}
-          />
+          <Register register={register} setPage={setPage} />
         )}
       </div>
     );
   }
 
+  /* MAIN APP */
   return (
     <div className="app">
-
-      <Navbar
-        setPage={setPage}
-        userRole={userRole}
-        logout={logout}
-      />
+      <Navbar setPage={setPage} userRole={userRole} logout={logout} />
 
       <main className="main-content">
 
-        {/* HOME PAGE */}
+        {/* HOME */}
         {page === "home" && (
           <section
             className="hero"
@@ -217,183 +134,113 @@ export default function App() {
             <div
               className="hero-card"
               style={{
-                background:
-                  "rgba(255,255,255,0.15)",
-                backdropFilter: "blur(5px)",
-                WebkitBackdropFilter:
-                  "blur(12px)",
-                border:
-                  "2px solid rgba(255,255,255,0.4)",
+                background: "rgba(255,255,255,0.15)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                border: "2px solid rgba(255,255,255,0.4)",
                 borderRadius: "20px",
               }}
             >
-              <p className="eyebrow">
-                Welcome to Saloné
-              </p>
+              <p className="eyebrow">Welcome to Saloné</p>
 
-              <h1>
-                Beauty appointments made
-                effortless.
-              </h1>
+              <h1>Beauty appointments made effortless.</h1>
 
               <p>
-                Luxury salon appointment
-                booking and customer
-                management system.
+                Luxury salon appointment booking and customer management system.
               </p>
 
               <button
                 className="primary-btn"
                 onClick={() =>
-                  userRole === "admin"
-                    ? setPage("admin")
-                    : setPage("services")
+                  setPage(userRole === "admin" ? "admin" : "services")
                 }
               >
-                {userRole === "admin"
-                  ? "Open Admin Dashboard"
-                  : "Book Appointment"}
+                {userRole === "admin" ? "Open Admin Dashboard" : "Book Appointment"}
               </button>
             </div>
           </section>
         )}
 
-        {/* SERVICES PAGE */}
+        {/* SERVICES */}
         {page === "services" && (
           <section className="services-section">
-
-            {/* HEADING */}
             <div className="section-heading">
-
-              <div className="mini-title">
-                <span></span>
-                OUR OFFERINGS
-                <span></span>
-              </div>
-
+              <div className="eyebrow">Our Offerings</div>
               <h2>SERVICES</h2>
-
               <p className="services-subtitle">
-                Pamper yourself with our
-                professional salon services
-                designed to make you look and
-                feel your best.
+                Pamper yourself with our professional salon services designed to
+                make you look and feel your best.
               </p>
-
-              <div className="services-divider">
-                crafted with care
-              </div>
-
+              <div className="services-divider">crafted with care</div>
             </div>
 
-            {/* SERVICE GRID */}
             <div className="service-grid">
-
-              {services.map(
-                (service, index) => (
-                  <ServiceCard
-                    key={index}
-                    service={service}
-                    onBook={() => {
-                      setSelectedService(
-                        service.name
-                      );
-                      setPage("booking");
-                    }}
-                  />
-                )
-              )}
-
+              {services.map((service, index) => (
+                <ServiceCard
+                  key={index}
+                  service={service}
+                  onBook={() => {
+                    setSelectedService(service.name);
+                    setPage("booking");
+                  }}
+                />
+              ))}
             </div>
 
-            {/* FEATURES */}
             <div className="features">
-
               <div className="feature-item">
                 <div>
                   <h4>Easy Booking</h4>
-
-                  <p>
-                    Book your appointment in
-                    just a few clicks
-                  </p>
+                  <p>Book your appointment in just a few clicks</p>
                 </div>
               </div>
-
               <div className="feature-item">
                 <div>
-                  <h4>
-                    Trusted Professionals
-                  </h4>
-
-                  <p>
-                    Experienced and certified
-                    salon experts
-                  </p>
+                  <h4>Trusted Professionals</h4>
+                  <p>Experienced and certified salon experts</p>
                 </div>
               </div>
-
               <div className="feature-item">
                 <div>
                   <h4>Premium Products</h4>
-
-                  <p>
-                    We use high-quality
-                    products for the best
-                    results
-                  </p>
+                  <p>We use high-quality products for the best results</p>
                 </div>
               </div>
-
             </div>
-
           </section>
         )}
 
-        {/* BOOKING PAGE */}
+        {/* BOOKING */}
         {page === "booking" && (
           <section className="booking-section">
-
             <div className="booking-wrapper">
-
-              {/* LEFT IMAGE */}
               <div className="booking-left">
-
                 <img
                   src={book}
                   alt="Salon Booking"
                   className="booking-side-image"
                 />
-
               </div>
 
-              {/* RIGHT SIDE */}
               <div className="booking-right">
-
                 <div className="booking-top">
-
+                  <p className="booking-subtitle">RESERVE YOUR VISIT</p>
                   <h2 className="booking-main-title">
                     Schedule your salon visit
                   </h2>
-
                 </div>
 
                 <BookingForm
                   services={services}
                   addBooking={addBooking}
-                  selectedService={
-                    selectedService
-                  }
+                  selectedService={selectedService}
                 />
-
               </div>
-
             </div>
-
           </section>
         )}
 
-        {/* STATUS PAGE */}
+        {/* STATUS */}
         {page === "status" && (
           <BookingStatus
             bookings={bookings}
@@ -401,7 +248,7 @@ export default function App() {
           />
         )}
 
-        {/* ADMIN PAGE */}
+        {/* ADMIN */}
         {page === "admin" && (
           <AdminPanel
             bookings={bookings}
@@ -410,7 +257,6 @@ export default function App() {
         )}
 
       </main>
-
     </div>
   );
 }

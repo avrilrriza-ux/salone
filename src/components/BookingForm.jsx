@@ -60,10 +60,6 @@ export default function BookingForm({
           Book Appointment
         </p>
 
-        <h2>
-          Schedule your salon visit
-        </h2>
-
         <form onSubmit={handleSubmit}>
 
           <label>Customer Name</label>
