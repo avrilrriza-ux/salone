@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-
 import Navbar from "./components/Navbar";
 import ServiceCard from "./components/ServiceCard";
 import BookingForm from "./components/BookingForm";
@@ -7,9 +6,8 @@ import BookingStatus from "./components/BookingStatus";
 import AdminPanel from "./components/AdminPanel";
 import Login from "./components/Login";
 import Register from "./components/Register";
-
 import salonBg from "./assets/salon.png";
-
+import book from "./assets/book.jpg";
 import haircutImg from "./assets/hair and styling.png";
 import haircolorImg from "./assets/Haircolor.png";
 import manicureImg from "./assets/Manicure.png";
@@ -31,35 +29,30 @@ export default function App() {
       price: 250,
       duration: "45 mins",
       image: haircutImg,
-      icon: "✂️",
     },
     {
       name: "Hair Color",
       price: 1200,
       duration: "2 hrs",
       image: haircolorImg,
-      icon: "🎨",
     },
     {
       name: "Manicure",
       price: 300,
       duration: "40 mins",
       image: manicureImg,
-      icon: "💅",
     },
     {
       name: "Pedicure",
       price: 350,
       duration: "45 mins",
       image: pedicureImg,
-      icon: "🦶",
     },
     {
       name: "Hair Treatment",
       price: 800,
       duration: "1 hr",
       image: treatmentImg,
-      icon: "💧",
     },
   ];
 
@@ -201,6 +194,7 @@ export default function App() {
 
   return (
     <div className="app">
+
       <Navbar
         setPage={setPage}
         userRole={userRole}
@@ -224,12 +218,12 @@ export default function App() {
               className="hero-card"
               style={{
                 background:
-                  "rgba(255, 255, 255, 0.15)",
+                  "rgba(255,255,255,0.15)",
                 backdropFilter: "blur(5px)",
                 WebkitBackdropFilter:
                   "blur(12px)",
                 border:
-                  "2px solid rgba(255, 255, 255, 0.4)",
+                  "2px solid rgba(255,255,255,0.4)",
                 borderRadius: "20px",
               }}
             >
@@ -244,8 +238,8 @@ export default function App() {
 
               <p>
                 Luxury salon appointment
-                booking and customer management
-                system.
+                booking and customer
+                management system.
               </p>
 
               <button
@@ -267,10 +261,15 @@ export default function App() {
         {/* SERVICES PAGE */}
         {page === "services" && (
           <section className="services-section">
+
+            {/* HEADING */}
             <div className="section-heading">
-              <p className="eyebrow">
-          
-              </p>
+
+              <div className="mini-title">
+                <span></span>
+                OUR OFFERINGS
+                <span></span>
+              </div>
 
               <h2>SERVICES</h2>
 
@@ -280,9 +279,16 @@ export default function App() {
                 designed to make you look and
                 feel your best.
               </p>
+
+              <div className="services-divider">
+                crafted with care
+              </div>
+
             </div>
 
+            {/* SERVICE GRID */}
             <div className="service-grid">
+
               {services.map(
                 (service, index) => (
                   <ServiceCard
@@ -297,13 +303,13 @@ export default function App() {
                   />
                 )
               )}
+
             </div>
 
             {/* FEATURES */}
             <div className="features">
-              <div className="feature-item">
-                <span>📅</span>
 
+              <div className="feature-item">
                 <div>
                   <h4>Easy Booking</h4>
 
@@ -315,8 +321,6 @@ export default function App() {
               </div>
 
               <div className="feature-item">
-                <span>🛡️</span>
-
                 <div>
                   <h4>
                     Trusted Professionals
@@ -330,8 +334,6 @@ export default function App() {
               </div>
 
               <div className="feature-item">
-                <span>🌿</span>
-
                 <div>
                   <h4>Premium Products</h4>
 
@@ -342,17 +344,53 @@ export default function App() {
                   </p>
                 </div>
               </div>
+
             </div>
+
           </section>
         )}
 
         {/* BOOKING PAGE */}
         {page === "booking" && (
-          <BookingForm
-            services={services}
-            addBooking={addBooking}
-            selectedService={selectedService}
-          />
+          <section className="booking-section">
+
+            <div className="booking-wrapper">
+
+              {/* LEFT IMAGE */}
+              <div className="booking-left">
+
+                <img
+                  src={book}
+                  alt="Salon Booking"
+                  className="booking-side-image"
+                />
+
+              </div>
+
+              {/* RIGHT SIDE */}
+              <div className="booking-right">
+
+                <div className="booking-top">
+
+                  <h2 className="booking-main-title">
+                    Schedule your salon visit
+                  </h2>
+
+                </div>
+
+                <BookingForm
+                  services={services}
+                  addBooking={addBooking}
+                  selectedService={
+                    selectedService
+                  }
+                />
+
+              </div>
+
+            </div>
+
+          </section>
         )}
 
         {/* STATUS PAGE */}
@@ -370,8 +408,9 @@ export default function App() {
             updateStatus={updateStatus}
           />
         )}
-        
+
       </main>
+
     </div>
   );
 }

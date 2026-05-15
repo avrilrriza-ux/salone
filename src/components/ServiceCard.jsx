@@ -4,29 +4,30 @@ export default function ServiceCard({
 }) {
   return (
     <div className="service-card">
-      <div className="service-image">
-        <img
-          src={service.image}
-          alt={service.name}
-        />
-      </div>
-
-      <div className="service-icon">
-        {service.icon}
-      </div>
+      <img
+        src={service.image}
+        alt={service.name}
+      />
 
       <div className="service-content">
+
         <h3>{service.name}</h3>
 
-        <p className="duration">
-          ⏱ {service.duration}
+        <p className="service-duration">
+          {service.duration}
         </p>
 
-        <h4>₱{service.price}</h4>
+        <h4 className="service-price">
+          ₱{service.price}
+        </h4>
 
-        <button onClick={onBook}>
-          Book Now
+        <button
+          className="service-btn"
+          onClick={onBook}
+        >
+          BOOK NOW
         </button>
+
       </div>
     </div>
   );
