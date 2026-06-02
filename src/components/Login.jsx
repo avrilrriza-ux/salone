@@ -1,52 +1,66 @@
 import { useState } from "react";
+import { auth } from "../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
-export default function Login({ login, setPage }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+export default function Login({ setPage, onLoginSuccess }) {
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
+    setLoading(true);
 
-    const success = login(username, password);
+    try {
+      const cleanEmail = form.email.trim();
+      const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, form.password);
 
-    if (!success) {
-      alert("Invalid username or password.");
+      if (onLoginSuccess) {
+        onLoginSuccess(userCredential.user);
+      } else {
+        setPage("home");
+      }
+    } catch (error) {
+      console.error("Login error:", error.code, error.message);
+      alert("Invalid email or password.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <div className="auth-card">
       <p className="eyebrow">Saloné</p>
-
       <h2>Login</h2>
 
       <form onSubmit={handleSubmit}>
         <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) =>
-            setUsername(e.target.value)
-          }
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
         />
 
         <input
           type="password"
+          name="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
+          value={form.password}
+          onChange={handleChange}
+          required
         />
 
-        <button className="primary-btn">
-          Login
+        <button className="primary-btn" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
 
-      <p className="switch-text">
-        No account yet?
-      </p>
+      <p className="switch-text">No account yet?</p>
 
       <button
         className="switch-btn"
