@@ -1,4 +1,4 @@
-export default function AdminPanel({ bookings, updateStatus }) {
+export default function AdminPanel({ bookings, updateStatus, setPage }) {
   const pending = bookings.filter((b) => b.status === "Pending").length;
   const confirmed = bookings.filter((b) => b.status === "Confirmed").length;
   const ongoing = bookings.filter((b) => b.status === "Ongoing").length;
@@ -14,6 +14,11 @@ export default function AdminPanel({ bookings, updateStatus }) {
         <p className="eyebrow">Admin Dashboard</p>
         <h2>Manage salon operations</h2>
       </div>
+      <div style={{ marginBottom: "20px" }}>
+  
+
+  
+</div>
 
       <div className="stats-grid">
         <div className="stat-card">

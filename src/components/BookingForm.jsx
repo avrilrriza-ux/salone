@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { doc, getDoc ,collection, onSnapshot,} from "firebase/firestore";
+import { db } from "../firebase";
 
 export default function BookingForm({
   services,
@@ -7,12 +9,18 @@ export default function BookingForm({
   leftImage,
 }) {
   const [form, setForm] = useState({
+    
     customerName: "",
     service: selectedService || "",
     date: "",
     time: "",
     staff: "",
   });
+  const [scheduleSettings, setScheduleSettings] =
+  useState(null);
+
+  const [staffs, setStaffs] = useState([]);
+  
 
   useEffect(() => {
     setForm((prev) => ({
@@ -20,7 +28,38 @@ export default function BookingForm({
       service: selectedService || "",
     }));
   }, [selectedService]);
+useEffect(() => {
+  const loadScheduleSettings = async () => {
+    const snap = await getDoc(
+      doc(db, "settings", "schedule")
+    );
 
+    if (snap.exists()) {
+      setScheduleSettings(
+        snap.data()
+      );
+    }
+  };
+
+  loadScheduleSettings();
+}, []);
+useEffect(() => {
+  const unsubscribe = onSnapshot(
+    collection(db, "staff"),
+    (snapshot) => {
+      const data = snapshot.docs.map(
+        (doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })
+      );
+
+      setStaffs(data);
+    }
+  );
+
+  return () => unsubscribe();
+}, []);
   function handleChange(e) {
     setForm({
       ...form,
@@ -41,7 +80,51 @@ export default function BookingForm({
       return;
     }
 
-    addBooking(form);
+    const selectedDateTime = new Date(
+  `${form.date}T${form.time}`
+);
+
+const now = new Date();
+
+if (selectedDateTime < now) {
+  alert(
+    "You cannot book an appointment in the past."
+  );
+  return;
+}
+if (scheduleSettings) {
+  const selectedDay = new Date(
+    form.date
+  ).toLocaleDateString("en-US", {
+    weekday: "long",
+  });
+
+  if (
+    !scheduleSettings.workingDays?.includes(
+      selectedDay
+    )
+  ) {
+    alert(
+      `Salon is closed on ${selectedDay}`
+    );
+    return;
+  }
+
+  if (
+    form.time <
+      scheduleSettings.openingTime ||
+    form.time >
+      scheduleSettings.closingTime
+  ) {
+    alert(
+      `Available hours are ${scheduleSettings.openingTime} - ${scheduleSettings.closingTime}`
+    );
+
+    return;
+  }
+}
+
+addBooking(form);
 
     setForm({
       customerName: "",
@@ -102,11 +185,16 @@ export default function BookingForm({
             <div className="booking-group">
               <label>Date</label>
               <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-              />
+  type="date"
+  name="date"
+  value={form.date}
+  min={
+    new Date()
+      .toISOString()
+      .split("T")[0]
+  }
+  onChange={handleChange}
+/>
             </div>
 
             <div className="booking-group">
@@ -126,10 +214,18 @@ export default function BookingForm({
                 value={form.staff}
                 onChange={handleChange}
               >
-                <option value="">No preference</option>
-                <option value="Staff A">Staff A</option>
-                <option value="Staff B">Staff B</option>
-                <option value="Staff C">Staff C</option>
+                <option value="">
+  No preference
+</option>
+
+{staffs.map((staff) => (
+  <option
+    key={staff.id}
+    value={staff.name}
+  >
+    {staff.name}
+  </option>
+))}
               </select>
             </div>
 

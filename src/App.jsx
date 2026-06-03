@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import "./App.css";
 
@@ -14,7 +15,10 @@ import {
   query,
   where,
 } from "firebase/firestore";
-
+import ServiceDetails from "./components/ServiceDetails";
+import ScheduleManagement from "./components/ScheduleManagement";
+import ServiceManagement from "./components/ServiceManagement";
+import StaffManagement from "./components/StaffManagement";
 import Navbar from "./components/Navbar";
 import ServiceCard from "./components/ServiceCard";
 import BookingForm from "./components/BookingForm";
@@ -46,6 +50,8 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [selectedService, setSelectedService] = useState("");
+  const [selectedServiceDetails, setSelectedServiceDetails] =
+  useState(null);
   const [loading, setLoading] = useState(true);
 
   const [services, setServices] = useState([]);
@@ -302,9 +308,48 @@ export default function App() {
                   ? "Open Admin Dashboard"
                   : "Book Appointment"}
               </button>
+              
             </div>
           </section>
+          
         )}
+        {page === "home" && (
+  <section
+    id="services-preview"
+    className="services-preview"
+  >
+    <h2>Our Services</h2>
+
+    <div className="service-grid">
+      {services.slice(0, 5).map((service) => (
+      <ServiceCard
+  service={service}
+  onBook={() => handleBook(service)}
+  onViewDetails={(service) => {
+    console.log("clicked");
+    console.log(service);
+
+    setSelectedServiceDetails(service);
+    setPage("service-details");
+  }}
+/>
+
+      ))}
+    
+    </div>
+    {selectedServiceDetails && (
+  <div>
+    <h1>
+      {selectedServiceDetails.name}
+    </h1>
+
+    <p>
+      {selectedServiceDetails.description}
+    </p>
+  </div>
+)}
+  </section>
+)}
 
         {page === "services" && (
           <section className="services-section">
@@ -334,20 +379,59 @@ export default function App() {
             ) : (
               <div className="service-grid">
                 {services.map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    onBook={() => {
-                      setSelectedService(service.name);
-                      setPage("booking");
-                    }}
-                  />
-                ))}
+ <ServiceCard
+  service={service}
+  onBook={() => handleBook(service)}
+  onViewDetails={(service) => {
+    console.log("clicked");
+    console.log(service);
+
+    setSelectedServiceDetails(service);
+    setPage("service-details");
+  }}
+/>
+))}
               </div>
             )}
           </section>
         )}
+{page === "service-details" &&
+  selectedServiceDetails && (
+    <section className="services-section">
+      <h1>
+        {selectedServiceDetails.name}
+      </h1>
 
+      <img
+        src={selectedServiceDetails.image}
+        alt={selectedServiceDetails.name}
+        style={{
+          maxWidth: "400px",
+          width: "100%",
+        }}
+      />
+
+      <h3>
+        ₱{selectedServiceDetails.price}
+      </h3>
+
+      <p>
+        {selectedServiceDetails.description}
+      </p>
+
+      <button
+        className="primary-btn"
+        onClick={() => {
+          setSelectedService(
+            selectedServiceDetails.name
+          );
+          setPage("booking");
+        }}
+      >
+        Book Now
+      </button>
+    </section>
+)}
         {page === "booking" && (
           <BookingForm
             services={services}
@@ -362,8 +446,18 @@ export default function App() {
         )}
 
         {page === "admin" && (
-          <AdminPanel bookings={bookings} updateStatus={updateStatus} />
+          <AdminPanel bookings={bookings} updateStatus={updateStatus}  setPage={setPage} />
         )}
+        {page === "service-management" && (
+  <ServiceManagement />
+)}
+
+{page === "staff-management" && (
+  <StaffManagement />
+)}
+{page === "schedule-management" && (
+  <ScheduleManagement />
+)}
       </main>
     </div>
   );

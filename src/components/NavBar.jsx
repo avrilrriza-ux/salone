@@ -39,11 +39,25 @@ export default function Navbar({
           </>
         )}
 
-        {userRole === "admin" && (
-          <button onClick={() => setPage("admin")}>
-            Admin
-          </button>
-        )}
+       {userRole === "admin" && (
+  <>
+    <button onClick={() => setPage("admin")}>
+      Bookings
+    </button>
+
+    <button onClick={() => setPage("service-management")}>
+      Services
+    </button>
+
+    <button onClick={() => setPage("staff-management")}>
+      Staff
+    </button>
+
+    <button onClick={() => setPage("schedule-management")}>
+      Schedules
+    </button>
+  </>
+)}
 
         <button className="logout-btn" onClick={logout}>
           Logout
