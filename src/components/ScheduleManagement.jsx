@@ -82,8 +82,8 @@ const saveSettings = async () => {
     alert(
       "Schedule settings have been saved successfully!"
     );
-  } catch (error) {
-  console.error("Firebase Error:", error);
+  }catch (error) {
+  console.error(error);
 
   alert(error.message);
 }
