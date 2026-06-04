@@ -22,9 +22,20 @@ const [workingDays, setWorkingDays] = useState([
 
  useEffect(() => {
   const loadSettings = async () => {
-    const snap = await getDoc(
-      doc(db, "settings", "schedule")
-    );
+    const savedSettings =
+  localStorage.getItem("scheduleSettings");
+
+if (savedSettings) {
+  const data = JSON.parse(savedSettings);
+
+  setOpeningTime(data.openingTime);
+  setClosingTime(data.closingTime);
+  setMaxClients(data.maxClients);
+
+  if (data.workingDays) {
+    setWorkingDays(data.workingDays);
+  }
+}
 
     if (snap.exists()) {
       const data = snap.data();
@@ -69,15 +80,17 @@ const saveSettings = async () => {
   if (!confirmed) return;
 
   try {
-    await setDoc(
-      doc(db, "settings", "schedule"),
-      {
-        openingTime,
-        closingTime,
-        maxClients: Number(maxClients),
-        workingDays,
-      }
-    );
+    localStorage.setItem(
+  "scheduleSettings",
+  JSON.stringify({
+    openingTime,
+    closingTime,
+    maxClients,
+    workingDays,
+  })
+);
+
+alert("Settings saved!");
 
     alert(
       "Schedule settings have been saved successfully!"

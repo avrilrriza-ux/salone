@@ -188,6 +188,7 @@ export default function BookingStatus({ bookings }) {
                     <small>
                       Staff: {booking.staff || "No preference"}
                     </small>
+                    
                   </div>
 
                   <div className="appointment-actions">

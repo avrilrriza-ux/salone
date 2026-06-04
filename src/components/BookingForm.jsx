@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { doc,collection, onSnapshot,} from "firebase/firestore";
+import { collection, onSnapshot,} from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function BookingForm({
@@ -16,11 +16,20 @@ export default function BookingForm({
     time: "",
     staff: "",
   });
-  const [scheduleSettings, setScheduleSettings] =
-  useState(null);
+  
 
   const [staffs, setStaffs] = useState([]);
-  
+  const workingDays = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const openingTime = "09:00";
+const closingTime = "18:00";
 
   useEffect(() => {
     setForm((prev) => ({
@@ -28,20 +37,7 @@ export default function BookingForm({
       service: selectedService || "",
     }));
   }, [selectedService]);
-useEffect(() => {
-  const unsubscribe = onSnapshot(
-    doc(db, "settings", "schedule"),
-    (snap) => {
-      if (snap.exists()) {
-        setScheduleSettings(
-          snap.data()
-        );
-      }
-    }
-  );
 
-  return () => unsubscribe();
-}, []);
 useEffect(() => {
   const unsubscribe = onSnapshot(
     collection(db, "users"),
@@ -63,27 +59,22 @@ useEffect(() => {
 }, []);
 const availableTimes = [];
 
-if (
-  scheduleSettings?.openingTime &&
-  scheduleSettings?.closingTime
+const startHour = parseInt(
+  openingTime.split(":")[0]
+);
+
+const endHour = parseInt(
+  closingTime.split(":")[0]
+);
+
+for (
+  let hour = startHour;
+  hour <= endHour;
+  hour++
 ) {
-  const startHour = parseInt(
-    scheduleSettings.openingTime.split(":")[0]
+  availableTimes.push(
+    `${String(hour).padStart(2, "0")}:00`
   );
-
-  const endHour = parseInt(
-    scheduleSettings.closingTime.split(":")[0]
-  );
-
-  for (
-    let hour = startHour;
-    hour <= endHour;
-    hour++
-  ) {
-    availableTimes.push(
-      `${String(hour).padStart(2, "0")}:00`
-    );
-  }
 }
 const selectedDay = form.date
   ? new Date(form.date).toLocaleDateString(
@@ -93,17 +84,12 @@ const selectedDay = form.date
   : "";
   console.log("Date:", form.date);
 console.log("Day:", selectedDay);
-console.log(
-  "Working Days:",
-  scheduleSettings?.workingDays
-);
+
 const isOpenDay =
   form.date &&
-  scheduleSettings?.workingDays?.includes(
-    selectedDay
-  );
+  workingDays.includes(selectedDay);
   console.log("selectedDay:", selectedDay);
-console.log("scheduleSettings:", scheduleSettings);
+
 console.log("isOpenDay:", isOpenDay);
   function handleChange(e) {
     setForm({
@@ -138,32 +124,21 @@ if (selectedDateTime < now) {
   
   return;
 }
-if (scheduleSettings) {
- 
+if (!workingDays.includes(selectedDay)) {
+  alert(
+    `Salon is closed on ${selectedDay}`
+  );
+  return;
+}
 
-  if (
-    !scheduleSettings.workingDays?.includes(
-      selectedDay
-    )
-  ) {
-    alert(
-      `Salon is closed on ${selectedDay}`
-    );
-    return;
-  }
-
-  if (
-    form.time <
-      scheduleSettings.openingTime ||
-    form.time >
-      scheduleSettings.closingTime
-  ) {
-    alert(
-      `Available hours are ${scheduleSettings.openingTime} - ${scheduleSettings.closingTime}`
-    );
-
-    return;
-  }
+if (
+  form.time < openingTime ||
+  form.time > closingTime
+) {
+  alert(
+    `Available hours are ${openingTime} - ${closingTime}`
+  );
+  return;
 }
 
 addBooking(form);
@@ -243,33 +218,30 @@ addBooking(form);
       fontSize: "12px",
       marginTop: "5px",
       color:
-        scheduleSettings?.workingDays?.includes(
-          selectedDay
-        )
+       workingDays.includes(
+  selectedDay
+)
+         
           ? "green"
           : "red",
     }}
   >
-    {scheduleSettings?.workingDays?.includes(
-      selectedDay
-    )
+    {workingDays.includes(
+  selectedDay
+)
       ? `${selectedDay} is available`
       : `${selectedDay} is closed`}
   </p>
 )}
-{scheduleSettings && (
-  <p
-    style={{
-      fontSize: "12px",
-      color: "#666",
-      marginTop: "5px",
-    }}
-  >
-    Open:
-    {" "}
-    {scheduleSettings.workingDays?.join(", ")}
-  </p>
-)}
+<p
+  style={{
+    fontSize: "12px",
+    color: "#666",
+    marginTop: "5px",
+  }}
+>
+  Open: {workingDays.join(", ")}
+</p>
             </div>
 
             <div className="booking-group">
@@ -284,30 +256,43 @@ addBooking(form);
   </option>
 
   {isOpenDay &&
-  availableTimes.map((time) => (
-    <option
-      key={time}
-      value={time}
-    >
-      {time}
-    </option>
-  ))}
+  availableTimes.map((time) => {
+    const hour = parseInt(
+      time.split(":")[0]
+    );
+
+    const displayTime =
+      hour === 0
+        ? "12:00 AM"
+        : hour < 12
+        ? `${hour}:00 AM`
+        : hour === 12
+        ? "12:00 PM"
+        : `${hour - 12}:00 PM`;
+
+    return (
+      <option
+        key={time}
+        value={time}
+      >
+        {displayTime}
+      </option>
+    );
+  })}
 </select> 
-              {scheduleSettings && (
-  <p
-    style={{
-      fontSize: "12px",
-      color: "#666",
-      marginTop: "5px",
-    }}
-  >
-    Available Hours:
-    {" "}
-    {scheduleSettings.openingTime}
-    {" - "}
-    {scheduleSettings.closingTime}
-  </p>
-)}
+            <p
+  style={{
+    fontSize: "12px",
+    color: "#666",
+    marginTop: "5px",
+  }}
+>
+  Available Hours:
+  {" "}
+  {openingTime}
+  {" - "}
+  {closingTime}
+</p>
             </div>
 
 
