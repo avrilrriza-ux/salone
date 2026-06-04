@@ -61,7 +61,7 @@
 
 /* Service Card */
 .service-card {
-  height: 470px;
+  height: 550px;
   background: #fff7f0;
   border: 10px solid rgba(255, 250, 244, 0.95);
   border-radius: 24px;
@@ -771,4 +771,38 @@
   border-radius: 12px;
   max-width: 500px;
   width: 90%;
+}.service-details-page * {
+  box-sizing: border-box;
+}
+
+.service-details-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 80px !important;
+}
+
+.details-image-side {
+  width: 45% !important;
+}
+
+.details-content-side {
+  width: 55% !important;
+}
+
+.details-content-side h1 {
+  text-align: left !important;
+}
+
+.details-content-side h3 {
+  text-align: left !important;
+}
+
+.details-description {
+  text-align: left !important;
+}
+
+.details-price {
+  text-align: left !important;
 }

@@ -15,7 +15,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import ServiceDetails from "./components/ServiceDetails";
+
 import ScheduleManagement from "./components/ScheduleManagement";
 import ServiceManagement from "./components/ServiceManagement";
 import StaffManagement from "./components/StaffManagement";
@@ -50,8 +50,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [selectedService, setSelectedService] = useState("");
-  const [selectedServiceDetails, setSelectedServiceDetails] =
-  useState(null);
+  
   const [loading, setLoading] = useState(true);
 
   const [services, setServices] = useState([]);
@@ -102,16 +101,25 @@ export default function App() {
           const userSnap = await getDoc(userRef);
 
           if (userSnap.exists()) {
-            const data = userSnap.data();
+  const data = userSnap.data();
 
-            setCurrentUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              ...data,
-            });
+  if (data.role === "PENDING_STAFF") {
+    alert(
+      "Your staff application is pending approval. Please wait for admin confirmation."
+    );
 
-            setUserRole(data.role?.toLowerCase() || "customer");
-          } else {
+    await signOut(auth);
+    return;
+  }
+
+  setCurrentUser({
+    uid: firebaseUser.uid,
+    email: firebaseUser.email,
+    ...data,
+  });
+
+  setUserRole(data.role?.toLowerCase() || "customer");
+} else {
             setCurrentUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
@@ -230,6 +238,12 @@ export default function App() {
   const cancelBooking = async (id) => {
     await updateStatus(id, "Cancelled");
   };
+  const handleBook = (service) => {
+  console.log("Booking:", service);
+
+  setSelectedService(service.name);
+  setPage("booking");
+};
 
   if (loading) {
     return (
@@ -313,7 +327,8 @@ export default function App() {
           </section>
           
         )}
-        {page === "home" && (
+        {page === "home" &&
+ userRole === "customer" && (
   <section
     id="services-preview"
     className="services-preview"
@@ -325,29 +340,13 @@ export default function App() {
       <ServiceCard
   service={service}
   onBook={() => handleBook(service)}
-  onViewDetails={(service) => {
-    console.log("clicked");
-    console.log(service);
-
-    setSelectedServiceDetails(service);
-    setPage("service-details");
-  }}
+  
 />
 
       ))}
     
     </div>
-    {selectedServiceDetails && (
-  <div>
-    <h1>
-      {selectedServiceDetails.name}
-    </h1>
-
-    <p>
-      {selectedServiceDetails.description}
-    </p>
-  </div>
-)}
+   
   </section>
 )}
 
@@ -382,56 +381,14 @@ export default function App() {
  <ServiceCard
   service={service}
   onBook={() => handleBook(service)}
-  onViewDetails={(service) => {
-    console.log("clicked");
-    console.log(service);
-
-    setSelectedServiceDetails(service);
-    setPage("service-details");
-  }}
+ 
 />
 ))}
               </div>
             )}
           </section>
         )}
-{page === "service-details" &&
-  selectedServiceDetails && (
-    <section className="services-section">
-      <h1>
-        {selectedServiceDetails.name}
-      </h1>
 
-      <img
-        src={selectedServiceDetails.image}
-        alt={selectedServiceDetails.name}
-        style={{
-          maxWidth: "400px",
-          width: "100%",
-        }}
-      />
-
-      <h3>
-        ₱{selectedServiceDetails.price}
-      </h3>
-
-      <p>
-        {selectedServiceDetails.description}
-      </p>
-
-      <button
-        className="primary-btn"
-        onClick={() => {
-          setSelectedService(
-            selectedServiceDetails.name
-          );
-          setPage("booking");
-        }}
-      >
-        Book Now
-      </button>
-    </section>
-)}
         {page === "booking" && (
           <BookingForm
             services={services}

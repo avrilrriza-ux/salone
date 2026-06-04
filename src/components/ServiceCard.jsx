@@ -1,4 +1,4 @@
-export default function ServiceCard({ service, onBook, onViewDetails }) {
+export default function ServiceCard({ service, onBook }) {
   return (
     <div className="service-card">
       <div className="service-image-box">
@@ -15,24 +15,22 @@ export default function ServiceCard({ service, onBook, onViewDetails }) {
         <p className="service-duration">
           <span>◷</span> {service.duration || "No duration"}
         </p>
+        <p className="service-description">
+  {service.description || "No description"}
+</p>
 
         <h4 className="service-price">
           ₱{service.price ?? "0"}
         </h4>
 
        <div className="service-actions">
-  <button
-  className="service-btn secondary"
-  onClick={() =>
-    onViewDetails(service)
-  }
->
-  VIEW DETAILS
-</button>
+  
 
   <button
     className="service-btn"
-    onClick={onBook}
+    onClick={() =>
+      onBook(service)
+    }
   >
     BOOK NOW
   </button>

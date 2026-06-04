@@ -62,17 +62,31 @@ const toggleDay = (day) => {
 };
 
 const saveSettings = async () => {
-  await setDoc(
-    doc(db, "settings", "schedule"),
-    {
-      openingTime,
-      closingTime,
-      maxClients: Number(maxClients),
-      workingDays,
-    }
+  const confirmed = window.confirm(
+    "Are you sure you want to save these schedule settings?"
   );
 
-  alert("Settings saved!");
+  if (!confirmed) return;
+
+  try {
+    await setDoc(
+      doc(db, "settings", "schedule"),
+      {
+        openingTime,
+        closingTime,
+        maxClients: Number(maxClients),
+        workingDays,
+      }
+    );
+
+    alert(
+      "Schedule settings have been saved successfully!"
+    );
+  } catch (error) {
+  console.error("Firebase Error:", error);
+
+  alert(error.message);
+}
 };
 
   return (

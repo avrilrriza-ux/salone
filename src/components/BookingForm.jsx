@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { doc, getDoc ,collection, onSnapshot,} from "firebase/firestore";
+import { doc,collection, onSnapshot,} from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function BookingForm({
@@ -29,30 +29,31 @@ export default function BookingForm({
     }));
   }, [selectedService]);
 useEffect(() => {
-  const loadScheduleSettings = async () => {
-    const snap = await getDoc(
-      doc(db, "settings", "schedule")
-    );
-
-    if (snap.exists()) {
-      setScheduleSettings(
-        snap.data()
-      );
+  const unsubscribe = onSnapshot(
+    doc(db, "settings", "schedule"),
+    (snap) => {
+      if (snap.exists()) {
+        setScheduleSettings(
+          snap.data()
+        );
+      }
     }
-  };
+  );
 
-  loadScheduleSettings();
+  return () => unsubscribe();
 }, []);
 useEffect(() => {
   const unsubscribe = onSnapshot(
-    collection(db, "staff"),
+    collection(db, "users"),
     (snapshot) => {
-      const data = snapshot.docs.map(
-        (doc) => ({
+      const data = snapshot.docs
+        .map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        })
-      );
+        }))
+        .filter(
+          (user) => user.role === "STAFF"
+        );
 
       setStaffs(data);
     }
@@ -60,6 +61,50 @@ useEffect(() => {
 
   return () => unsubscribe();
 }, []);
+const availableTimes = [];
+
+if (
+  scheduleSettings?.openingTime &&
+  scheduleSettings?.closingTime
+) {
+  const startHour = parseInt(
+    scheduleSettings.openingTime.split(":")[0]
+  );
+
+  const endHour = parseInt(
+    scheduleSettings.closingTime.split(":")[0]
+  );
+
+  for (
+    let hour = startHour;
+    hour <= endHour;
+    hour++
+  ) {
+    availableTimes.push(
+      `${String(hour).padStart(2, "0")}:00`
+    );
+  }
+}
+const selectedDay = form.date
+  ? new Date(form.date).toLocaleDateString(
+      "en-US",
+      { weekday: "long" }
+    )
+  : "";
+  console.log("Date:", form.date);
+console.log("Day:", selectedDay);
+console.log(
+  "Working Days:",
+  scheduleSettings?.workingDays
+);
+const isOpenDay =
+  form.date &&
+  scheduleSettings?.workingDays?.includes(
+    selectedDay
+  );
+  console.log("selectedDay:", selectedDay);
+console.log("scheduleSettings:", scheduleSettings);
+console.log("isOpenDay:", isOpenDay);
   function handleChange(e) {
     setForm({
       ...form,
@@ -90,14 +135,11 @@ if (selectedDateTime < now) {
   alert(
     "You cannot book an appointment in the past."
   );
+  
   return;
 }
 if (scheduleSettings) {
-  const selectedDay = new Date(
-    form.date
-  ).toLocaleDateString("en-US", {
-    weekday: "long",
-  });
+ 
 
   if (
     !scheduleSettings.workingDays?.includes(
@@ -195,17 +237,79 @@ addBooking(form);
   }
   onChange={handleChange}
 />
+{form.date && (
+  <p
+    style={{
+      fontSize: "12px",
+      marginTop: "5px",
+      color:
+        scheduleSettings?.workingDays?.includes(
+          selectedDay
+        )
+          ? "green"
+          : "red",
+    }}
+  >
+    {scheduleSettings?.workingDays?.includes(
+      selectedDay
+    )
+      ? `${selectedDay} is available`
+      : `${selectedDay} is closed`}
+  </p>
+)}
+{scheduleSettings && (
+  <p
+    style={{
+      fontSize: "12px",
+      color: "#666",
+      marginTop: "5px",
+    }}
+  >
+    Open:
+    {" "}
+    {scheduleSettings.workingDays?.join(", ")}
+  </p>
+)}
             </div>
 
             <div className="booking-group">
               <label>Time</label>
-              <input
-                type="time"
-                name="time"
-                value={form.time}
-                onChange={handleChange}
-              />
+            <select
+  name="time"
+  value={form.time}
+  onChange={handleChange}
+>
+  <option value="">
+    Select Time
+  </option>
+
+  {isOpenDay &&
+  availableTimes.map((time) => (
+    <option
+      key={time}
+      value={time}
+    >
+      {time}
+    </option>
+  ))}
+</select> 
+              {scheduleSettings && (
+  <p
+    style={{
+      fontSize: "12px",
+      color: "#666",
+      marginTop: "5px",
+    }}
+  >
+    Available Hours:
+    {" "}
+    {scheduleSettings.openingTime}
+    {" - "}
+    {scheduleSettings.closingTime}
+  </p>
+)}
             </div>
+
 
             <div className="booking-group">
               <label>Preferred Staff</label>
@@ -221,9 +325,9 @@ addBooking(form);
 {staffs.map((staff) => (
   <option
     key={staff.id}
-    value={staff.name}
+    value={staff.fullName}
   >
-    {staff.name}
+    {staff.fullName}
   </option>
 ))}
               </select>

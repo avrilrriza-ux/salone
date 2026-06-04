@@ -32,7 +32,9 @@ export default function Register({ setPage }) {
       await setDoc(doc(db, "users", user.uid), {
         fullName: cleanFullName,
         email: cleanEmail,
-        role: form.role,
+        role: form.role === "STAFF"
+  ? "PENDING_STAFF"
+  : form.role,
         createdAt: serverTimestamp(),
       });
 
@@ -89,6 +91,7 @@ export default function Register({ setPage }) {
         >
           <option value="CUSTOMER">CUSTOMER</option>
           <option value="ADMIN">ADMIN</option>
+          <option value="STAFF">STAFF</option>
         </select>
 
         <button className="primary-btn" disabled={loading}>

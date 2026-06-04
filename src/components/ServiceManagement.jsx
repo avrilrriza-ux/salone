@@ -14,6 +14,7 @@ export default function ServiceManagement() {
   const [serviceName, setServiceName] = useState("");
   const [servicePrice, setServicePrice] = useState("");
   const [serviceDescription, setServiceDescription] =useState("");
+  const [serviceDuration, setServiceDuration] = useState("");
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -35,28 +36,54 @@ export default function ServiceManagement() {
 
     await addDoc(collection(db, "services"), {
   name: serviceName,
-  price: servicePrice,
-   description: serviceDescription,
+  price: Number(servicePrice),
+  description: serviceDescription,
+  duration: serviceDuration,
   active: true,
 });
 
     setServiceName("");
     setServicePrice("");
+    setServiceDuration("");
 setServiceDescription("");
   };
 
-  const updatePrice = async (id, currentPrice) => {
-  const newPrice = prompt(
-    "Enter new price:",
-    currentPrice
+  const editService = async (service) => {
+  const newName = prompt(
+    "Enter service name:",
+    service.name
   );
 
-  if (!newPrice) return;
+  if (newName === null) return;
+
+  const newPrice = prompt(
+    "Enter price:",
+    service.price
+  );
+
+  if (newPrice === null) return;
+
+  const newDuration = prompt(
+    "Enter duration:",
+    service.duration
+  );
+
+  if (newDuration === null) return;
+
+  const newDescription = prompt(
+    "Enter description:",
+    service.description
+  );
+
+  if (newDescription === null) return;
 
   await updateDoc(
-    doc(db, "services", id),
+    doc(db, "services", service.id),
     {
+      name: newName,
       price: Number(newPrice),
+      duration: newDuration,
+      description: newDescription,
     }
   );
 };
@@ -86,6 +113,14 @@ const deleteService = async (id) => {
   value={servicePrice}
   onChange={(e) => setServicePrice(e.target.value)}
 />
+<input
+  type="text"
+  placeholder="Duration"
+  value={serviceDuration}
+  onChange={(e) =>
+    setServiceDuration(e.target.value)
+  }
+/>
 
  <input
   type="text"
@@ -110,6 +145,7 @@ const deleteService = async (id) => {
   <tr>
     <th>Service</th>
     <th>Price</th>
+    <th>Duration</th>
     <th>Description</th>
     <th>Action</th>
   </tr>
@@ -120,19 +156,15 @@ const deleteService = async (id) => {
             <tr key={service.id}>
   <td>{service.name}</td>
   <td>₱{service.price || 0}</td>
+  <td>{service.duration}</td>
   <td>{service.description}</td>
   <td>
-  <button
-    className="accept-btn"
-    onClick={() =>
-      updatePrice(
-        service.id,
-        service.price
-      )
-    }
-  >
-    Edit Price
-  </button>
+ <button
+  className="accept-btn"
+  onClick={() => editService(service)}
+>
+  Edit Service
+</button>
 
   <button
     className="decline-btn"

@@ -1,73 +1,72 @@
 import { useState, useEffect } from "react";
 import {
   collection,
-  addDoc,
   onSnapshot,
-  deleteDoc,
   doc,
   updateDoc,
+    deleteDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function StaffManagement() {
   const [staffs, setStaffs] = useState([]);
-  const [staffName, setStaffName] = useState("");
+  const [approvedStaffs, setApprovedStaffs] = useState([]);
+  
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(db, "staff"),
-      (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setStaffs(data);
-      }
-    );
+  const unsubscribe = onSnapshot(
+    collection(db, "users"),
+    (snapshot) => {
+      const users = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    return () => unsubscribe();
-  }, []);
+      setStaffs(
+        users.filter(
+          (user) => user.role === "PENDING_STAFF"
+        )
+      );
 
-  const addStaff = async () => {
-  try {
-    if (!staffName.trim()) return;
-
-    await addDoc(collection(db, "staff"), {
-      name: staffName,
-    });
-    
-
-    console.log("Staff added!");
-
-    setStaffName("");
-  } catch (error) {
-  alert(error.message);
-  console.error(error);
-}
-};
-const deleteStaff = async (id) => {
-  await deleteDoc(
-    doc(db, "staff", id)
-  );
-};
-const editStaff = async (
-  id,
-  currentName
-) => {
-  const newName = prompt(
-    "Enter new staff name:",
-    currentName
+      setApprovedStaffs(
+        users.filter(
+          (user) => user.role === "STAFF"
+        )
+      );
+    }
   );
 
-  if (!newName) return;
-
+  return () => unsubscribe();
+}, []);
+const acceptStaff = async (id) => {
   await updateDoc(
-    doc(db, "staff", id),
+    doc(db, "users", id),
     {
-      name: newName,
+      role: "STAFF",
     }
   );
 };
+
+const rejectStaff = async (id) => {
+  await updateDoc(
+    doc(db, "users", id),
+    {
+      role: "CUSTOMER",
+    }
+  );
+};
+
+ const deleteStaff = async (id) => {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this staff?"
+  );
+
+  if (!confirmed) return;
+
+  await deleteDoc(doc(db, "users", id));
+};
+
+  
 
  return (
   <section className="admin-dashboard-section">
@@ -85,61 +84,84 @@ const editStaff = async (
 
     <div className="admin-table">
       <div style={{ marginBottom: "20px" }}>
-        <input
-          type="text"
-          placeholder="Staff Name"
-          value={staffName}
-          onChange={(e) => setStaffName(e.target.value)}
-        />
+       
 
-        <button
-          className="accept-btn"
-          onClick={addStaff}
-          style={{ marginLeft: "10px" }}
-        >
-          Add Staff
-        </button>
+        
       </div>
 
-      {staffs.length === 0 ? (
-        <p className="empty-text">No staff added yet.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Staff Name</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+       {staffs.length === 0 ? (
+  <p className="empty-text">No pending staff applications.</p>
+) : (
+  <table>
+    <thead>
+      <tr>
+        <th>Staff Name</th>
+        <th>Action</th>
+      </tr>
+    </thead>
 
-          <tbody>
-            {staffs.map((staff) => (
-              <tr key={staff.id}>
-                <td>{staff.name}</td>
+    <tbody>
+      {staffs.map((staff) => (
+        <tr key={staff.id}>
+          <td>{staff.fullName}</td>
 
-                <td>
-  <button
-    className="accept-btn"
-    onClick={() =>
-      editStaff(staff.id, staff.name)
-    }
-  >
-    Edit
-  </button>
+          <td>
+            <button
+              className="accept-btn"
+              onClick={() => acceptStaff(staff.id)}
+            >
+              Accept
+            </button>
 
-  <button
-    className="decline-btn"
-    style={{ marginLeft: "10px" }}
-    onClick={() => deleteStaff(staff.id)}
-  >
-    Delete
-  </button>
-</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            <button
+              className="decline-btn"
+              style={{ marginLeft: "10px" }}
+              onClick={() => rejectStaff(staff.id)}
+            >
+              Reject
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}
+      <h3 style={{ marginTop: "30px" }}>
+  Approved Staff
+</h3>
+{approvedStaffs.length === 0 ? (
+  <p>No approved staff yet.</p>
+) : (
+  <table>
+    <thead>
+      <tr>
+        <th>Staff Name</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {approvedStaffs.map((staff) => (
+        <tr key={staff.id}>
+          <td>{staff.fullName}</td>
+          <td>{staff.email}</td>
+
+          <td>
+            <button
+              className="decline-btn"
+              onClick={() => deleteStaff(staff.id)}
+            >
+              Remove Staff
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}
+
+
     </div>
   </section>
 );
